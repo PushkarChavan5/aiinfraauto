@@ -1,4 +1,15 @@
-variable "project" {
+terraform {
+  required_version = ">= 1.5"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 5.0"
+    }
+  }
+}
+
+variable "project_id" {
   description = "GCP project ID"
   type        = string
 }
@@ -13,17 +24,15 @@ variable "zone" {
   type        = string
 }
 
-resource "google_compute_instance" "vm-instance" {
-  name         = "vm-instance"
+resource "google_compute_instance" "debian_vm" {
+  name         = "debian-vm"
   machine_type = "e2-micro"
   zone         = var.zone
-  project      = var.project
-
-  tags = []
+  project      = var.project_id
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-12"
+      image = "debian-cloud/debian-11"
       size  = 10
     }
   }
@@ -36,19 +45,12 @@ resource "google_compute_instance" "vm-instance" {
     }
   }
 
-  # Minimal service account scope: this VM only serves static files and does
-  # not need to call any GCP APIs.
   service_account {
     scopes = ["userinfo-email"]
   }
 }
 
-output "instance_name" {
-  description = "Name of the created compute instance"
-  value       = google_compute_instance.vm-instance.name
-}
-
 output "instance_external_ip" {
-  description = "External IP address of the instance"
-  value       = google_compute_instance.vm-instance.network_interface[0].access_config[0].nat_ip
+  description = "Ephemeral public IP address of the debian-vm instance"
+  value       = google_compute_instance.debian_vm.network_interface[0].access_config[0].nat_ip
 }
