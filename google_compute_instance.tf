@@ -24,8 +24,8 @@ variable "zone" {
   type        = string
 }
 
-resource "google_compute_instance" "debian_vm" {
-  name         = "debian-vm"
+resource "google_compute_instance" "debian12_vm" {
+  name         = "debian12-vm"
   machine_type = "e2-micro"
   zone         = var.zone
   project      = var.project_id
@@ -51,6 +51,6 @@ resource "google_compute_instance" "debian_vm" {
 }
 
 output "instance_external_ip" {
-  description = "Ephemeral public IP address of the debian-vm instance"
-  value       = google_compute_instance.debian_vm.network_interface[0].access_config[0].nat_ip
+  description = "Ephemeral public IP address of the debian12-vm instance"
+  value       = google_compute_instance.debian12_vm.network_interface[0].access_config[0].nat_ip
 }
