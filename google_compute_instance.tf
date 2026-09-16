@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.5"
+  required_version = ">= 1.5.0"
 
   required_providers {
     google = {
@@ -7,6 +7,12 @@ terraform {
       version = "~> 5.0"
     }
   }
+}
+
+provider "google" {
+  project = var.project_id
+  region  = var.region
+  zone    = var.zone
 }
 
 variable "project_id" {
@@ -17,15 +23,17 @@ variable "project_id" {
 variable "region" {
   description = "GCP region for the instance"
   type        = string
+  default     = "us-central1"
 }
 
 variable "zone" {
   description = "GCP zone for the instance"
   type        = string
+  default     = "us-central1-a"
 }
 
-resource "google_compute_instance" "debian12_vm" {
-  name         = "debian12-vm"
+resource "google_compute_instance" "vm_instance" {
+  name         = "vm-instance"
   machine_type = "e2-micro"
   zone         = var.zone
   project      = var.project_id
@@ -33,7 +41,6 @@ resource "google_compute_instance" "debian12_vm" {
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-12"
-      size  = 10
     }
   }
 
@@ -41,16 +48,12 @@ resource "google_compute_instance" "debian12_vm" {
     network = "default"
 
     access_config {
-      // Ephemeral external IP; no static IP reservation to keep cost low
+      // ephemeral external IP
     }
-  }
-
-  service_account {
-    scopes = ["userinfo-email"]
   }
 }
 
 output "instance_external_ip" {
-  description = "Ephemeral public IP address of the debian12-vm instance"
-  value       = google_compute_instance.debian12_vm.network_interface[0].access_config[0].nat_ip
+  description = "Ephemeral public IP address of the instance"
+  value       = google_compute_instance.vm_instance.network_interface[0].access_config[0].nat_ip
 }
